@@ -1,7 +1,7 @@
 # Stage 0 PowerShell Implant
 
 A lightweight, OPSEC-focused PowerShell implant with encrypted command and control communication.
-
+NOTE: AES keys are hardcoded. That's a signature!!! Not ready for your cool ass red team engagements. 
 ## Features
 
 - **Encrypted Communication**: AES-256-CBC encryption for all C2 traffic
