@@ -74,7 +74,8 @@ python3 server.py 0.0.0.0 4343
 | **PowerShell** | `Get-Process` | Execute PowerShell commands (default) |
 | **PowerShell** | `ps` | Process listing (PowerShell alias) |
 | **PowerShell** | `ls` | Directory listing (PowerShell alias) |
-| **PowerShell** | `whoami` | Get current user |
+| **OPSEC-Safe** | `whoami` | Get current user (environment variables) |
+| **OPSEC-Safe** | `hostname` | Get hostname (environment variables) |
 | **Windows CMD** | `CMD whoami` | Execute Windows command prompt commands |
 
 ### Examples
@@ -126,43 +127,88 @@ Ethernet adapter Ethernet:
 - **Implement AMSI bypasses** for sensitive operations
 - **Use environment variables** instead of `whoami` for user info
 
+## Implant Generator
+
+The project includes a generator script that can create implants in PowerShell and C# with customizable encryption keys and server settings.
+
+> **Note:** All generated implants and their config files are now placed in the `implants/` directory.
+
+### Supported Languages
+- **PowerShell** (`.ps1`) - Full-featured implant with OPSEC-safe commands
+- **C#** (`.cs`) - Compiled .NET implant
+
+### Usage
+
+```bash
+# Generate PowerShell implant with random keys (output in implants/)
+python3 generator.py powershell --server 192.168.1.100 --port 4343
+
+# Generate C# implant with custom keys (output in implants/)
+python3 generator.py csharp --server 192.168.1.100 --port 4343 --key 43c1ed161272e682fb0022a6be82997b --iv a14fefa11652f54a05d97e22b4759517
+
+# Generate both PowerShell and C# implants with the same keys (output in implants/)
+python3 generator.py all --server 192.168.1.100 --port 4343
+
+# Load configuration from file
+python3 generator.py powershell --config my_config.json
+
+# Generate without updating server.py
+python3 generator.py powershell --server 192.168.1.100 --port 4343 --no-update-server
+```
+
+### Configuration File Format
+```json
+{
+  "server": "192.168.1.100",
+  "port": 4343,
+  "key": "43c1ed161272e682fb0022a6be82997b",
+  "iv": "a14fefa11652f54a05d97e22b4759517"
+}
+```
+
+### Server Integration
+By default, the generator automatically updates `server.py` with the new encryption keys to ensure compatibility. Use `--no-update-server` to disable this behavior.
+
 ## File Structure
 
 ```
 stage0/
-├── server.py          # C2 server
-├── implant.ps1        # PowerShell implant
-├── stage0_logs/       # Session logs
-├── __pycache__/       # Python cache
-└── README.md          # This file
+├── server.py              # C2 server
+├── generator.py           # Implant generator (PowerShell & C#)
+├── implants/              # All generated implants and configs
+├── stage0_logs/           # Session logs
+├── __pycache__/           # Python cache
+└── README.md              # This file
 ```
 
-## Security Notes
+## Features
+- Encrypted C2 communication (AES-256-CBC)
+- PowerShell and C# implant generation
+- OPSEC-safe `whoami` and `hostname` commands
+- In-memory command execution (PowerShell)
+- Session management (list, switch, kill, log)
+- Clean operator interface
+- Configurable keys and server settings
 
-- **For educational/authorized testing only**
-- **Use only on systems you own or have explicit permission to test**
-- **Encryption keys are hardcoded - change for production use**
-- **Consider implementing certificate-based authentication**
-- **Monitor for detection and adjust OPSEC measures accordingly**
+## OPSEC Considerations
+- Hardcoded keys are a signature; not suitable for real red team engagements
+- PowerShell logging, AMSI, and network traffic are detection vectors
+- No process creation except for `CMD` commands
+- OPSEC-safe user and host info via environment variables
+
+## Security Notes
+- Do not use hardcoded keys in real operations
+- Consider implementing key management and logging bypasses for advanced OPSEC
 
 ## Troubleshooting
+- If you see `[!] Failed to decode/decrypt incoming data` on the server, ensure the implant and server are using the same keys and protocol
+- Only PowerShell and C# implants are supported
 
-### Common Issues
-
-**Implant won't connect:**
-- Check server IP/port configuration
-- Verify firewall settings
-- Ensure PowerShell execution policy allows script execution
-
-**Commands not working:**
-- Use `CMD` prefix for Windows commands
-- PowerShell commands run by default
-- Check session status with `sessions`
-
-**Session disconnects:**
-- Implant automatically handles reconnection
-- Check network connectivity
-- Verify server is still running
+## Wishlist
+- [ ] Advanced OPSEC features (AMSI bypass, logging bypass)
+- [ ] File transfer support
+- [ ] Persistence options
+- [ ] More implant languages (if needed)
 
 ## License
 
