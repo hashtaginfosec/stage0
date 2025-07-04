@@ -2,6 +2,8 @@
 
 A lightweight, OPSEC-focused PowerShell implant with encrypted command and control communication.
 NOTE: AES keys are hardcoded. That's a signature!!! Not ready for your cool ass red team engagements. 
+
+
 ## Features
 
 - **Encrypted Communication**: AES-256-CBC encryption for all C2 traffic
@@ -28,7 +30,7 @@ NOTE: AES keys are hardcoded. That's a signature!!! Not ready for your cool ass 
 
 ### Prerequisites
 ```bash
-pip install pycryptodome prompt_toolkit
+pip install -r requirements.txt
 ```
 
 ### Server Setup
@@ -178,6 +180,7 @@ stage0/
 ├── implants/              # All generated implants and configs
 ├── stage0_logs/           # Session logs
 ├── __pycache__/           # Python cache
+├── requirements.txt       # Python dependencies
 └── README.md              # This file
 ```
 
